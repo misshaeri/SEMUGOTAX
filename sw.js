@@ -1,1 +1,22 @@
-const C='taxlab-final-framefit-icheon-20260908';const A=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(A))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
+const VERSION='taxlab-final-semugo-20260908-1';
+self.addEventListener('install',event=>{self.skipWaiting();});
+self.addEventListener('activate',event=>{
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.map(k=>caches.delete(k)));
+    await self.clients.claim();
+  })());
+});
+self.addEventListener('fetch',event=>{
+  if(event.request.method!=='GET') return;
+  event.respondWith((async()=>{
+    try{
+      const fresh=await fetch(event.request,{cache:'no-store'});
+      return fresh;
+    }catch(err){
+      const cached=await caches.match(event.request);
+      if(cached) return cached;
+      throw err;
+    }
+  })());
+});
